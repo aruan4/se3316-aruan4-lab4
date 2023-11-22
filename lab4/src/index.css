@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face{
+    font-family: "Techfont";
+    src: "./public/Techfont/static/PixelifySans-Regular.ttf";
+    font-weight: normal;
+    font-style: normal;
+}
+
+body{
+    background-color: #1a1919;
+}

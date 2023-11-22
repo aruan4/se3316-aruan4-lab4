@@ -26,14 +26,15 @@ router_powers.use(express.json());
 
 //Superhero info endpoints
 //Get hero information by ID
-router.get('/all', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     try {
         const snapshot  = await supInfo.get();
     
         const data = [];
         snapshot.forEach((doc) => {
-            data.push(doc.data());
+            if(doc.data().id == id)
+                data.push(doc.data());
         });
     
         res.json(data);
@@ -160,7 +161,7 @@ app.listen(port, () => {
 });
 
 //Setup serving front-end code
-// app.use('/', express.static('../Client'));
+app.use('/', express.static('../'));
 
 //Setup middleware to do logging
 app.use((req, res, next) => {
