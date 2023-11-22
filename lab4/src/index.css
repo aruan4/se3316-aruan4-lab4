@@ -4,7 +4,7 @@
 
 @font-face{
     font-family: "Techfont";
-    src: "./public/Techfont/static/PixelifySans-Regular.ttf";
+    src: url("../public/Techfont/static/PixelifySans-Regular.ttf");
     font-weight: normal;
     font-style: normal;
 }
