@@ -42,7 +42,7 @@ let Search = () => {
     }
 
     return(
-        <div className='px-16 py-12 m-8'>
+        <div className='px-16 py-8 m-8'>
             <h1 className='flex justify-center text-[#12a93b] font-techFont text-2xl pb-6'>Search for a hero</h1>
                 <div id='col1' className='grid grid-rows-5 bg-[#242323] px-8 py-4 justify-center'>
                     <p className='text-[#b5b5b5] font-techFont'>Choose search options:</p>
@@ -62,7 +62,7 @@ let Search = () => {
                         <input value={power} onChange={handlePower} className=' bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='Search by powers'></input>
                         <hr className='bg-white border-1 border-white'></hr>
                     </div>
-                    <button onClick={fieldSearch} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Search</button>
+                    <button onClick={fieldSearch} className='flex items-center justify-center bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Search</button>
                 </div>
             <div id='col3' className='font-techFont bg-[#0e7f2c] m-6 px-8 py-4 rounded-xl drop-shadow-lg'>
                 <div id='innerCol1' className='flex items-center justify-center'>

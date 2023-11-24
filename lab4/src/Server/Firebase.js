@@ -22,13 +22,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-
 // Initialize Firestore
 const db = getFirestore();
-// Collection refrences
-const supInfo = collection(db,'superhero_info');
-const supPowers = collection(db, 'superhero_powers');
-// Get collection data
-getDocs(colRef)
 
 export default app;

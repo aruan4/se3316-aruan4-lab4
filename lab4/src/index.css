@@ -13,6 +13,13 @@ body{
     background-color: #1a1919;
 }
 
+.icons{
+    margin-left: 0.25rem; 
+}
+.icons:hover{
+    color: #3c3c3c;
+}
+
 input{
     outline: none;
 }
