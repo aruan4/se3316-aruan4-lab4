@@ -6,7 +6,7 @@ import PopularLists from './components/PopularLists';
 
 function App() {
   return (
-    <div>
+    <div className='font-techFont'>
       <Login/>
       <Home/>
       <Search/>

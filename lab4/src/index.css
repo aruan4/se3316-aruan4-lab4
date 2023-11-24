@@ -12,3 +12,7 @@
 body{
     background-color: #1a1919;
 }
+
+input{
+    outline: none;
+}
