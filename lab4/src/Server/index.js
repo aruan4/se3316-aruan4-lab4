@@ -78,19 +78,19 @@ router.get('/search', async (req, res) => {
     const {name, race, pb, power} = req.query;
     let regexName; let regexRace; let regexPb; let regexPower;
     if(req.params.name=="")
-        regexName = RegExp(/^.*$/);
+        regexName = RegExp(/^[a-zA-Z]$/);
     else
         regexName = RegExp(name);
     if(req.params.race=="")
-        regexRace = RegExp(/^.*$/);
+        regexRace = RegExp(/^[a-zA-Z]$/);
     else
         regexRace = RegExp(race);
     if(req.params.publisher=="")
-        regexPb = RegExp(/^.*$/);
+        regexPb = RegExp(/^[a-zA-Z]$/);
     else
         regexPb = RegExp(pb);
     if(req.params.power=="")
-        regexPower = RegExp(/^.*$/);
+        regexPower = RegExp(/^[a-zA-Z]$/);
     else
         regexPower = RegExp(power);
     try {
