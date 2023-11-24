@@ -60,29 +60,25 @@ router.get('/info/publisher', (req, res) => {
     res.send(Object.keys(publishers));
 });
 
-//Get based on field, pattern, n
-router.get('/search/:field/:pattern/:n', (req, res) => {
-    let results = [];
-
-    const field = req.params.field;
-    const pattern = req.params.pattern;
-    const n = parseInt(req.params.n);
-
-    let regex = new RegExp(pattern);
-
-    for(hero in superhero_info){
-        //Check if field exists
-        if(superhero_info[hero].hasOwnProperty(field)){
-            //Add to results up to 'n' heroes
-            if(regex.test(superhero_info[hero][field]) && results.length < n)
-                results.push(superhero_info[hero].id);
-        }
-        else{
-            res.status(404).send(`Superhero ${field} is not a valid field.`);
-        }
-    }
-    res.send(results);
-})
+//Get based on name
+router.get('/search/:name', async (req, res) => {
+    let name = req.params.name;
+    let regex = RegExp(name);
+    try {
+        const snapshot  = await supInfo.get();
+    
+        const data = [];
+        snapshot.forEach((doc) => {
+            if(regex.test(doc.data().name))
+                data.push(doc.data());
+        });
+    
+        res.json(data);
+      } catch (error) {
+        console.error('Error getting Firestore data:', error);
+        res.status(500).send('Internal Server Error');
+      }
+});
 
 //POST a new list of superhero IDs
 router.post('/list/create/', (req, res) => {
@@ -155,7 +151,7 @@ app.use('/api/superhero_info', router);
 app.use('/api/superhero_powers', router_powers);
 
 //Port
-const port = process.env.PORT || 3000; //environment variable
+const port = process.env.PORT || 3001; //environment variable
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
