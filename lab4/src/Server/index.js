@@ -4,6 +4,10 @@ const app = express();
 const router = express.Router();
 const router_powers = express.Router();
 
+//Cors middleware setup
+const cors = require('cors');
+app.use(cors());
+
 //Firebase initialization
 const admin = require('firebase-admin');
 
@@ -24,9 +28,18 @@ const supPowers = db.collection('superhero_powers');
 router.use(express.json());
 router_powers.use(express.json());
 
+//Setup serving front-end code
+app.use('/', express.static('../'));
+
+//Setup middleware to do logging
+app.use((req, res, next) => {
+    console.log(`${req.method} request for ${req.url}`);
+    next();
+})
+
 //Superhero info endpoints
 //Get hero information by ID
-router.get('/:id', async (req, res) => {
+router.get('/yuck/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     try {
         const snapshot  = await supInfo.get();
@@ -60,16 +73,32 @@ router.get('/info/publisher', (req, res) => {
     res.send(Object.keys(publishers));
 });
 
-//Get based on name
-router.get('/search/:name', async (req, res) => {
-    let name = req.params.name;
-    let regex = RegExp(name);
+//Get based on fields
+router.get('/search', async (req, res) => {
+    const {name, race, pb, power} = req.query;
+    let regexName; let regexRace; let regexPb; let regexPower;
+    if(req.params.name=="")
+        regexName = RegExp(/^.*$/);
+    else
+        regexName = RegExp(name);
+    if(req.params.race=="")
+        regexRace = RegExp(/^.*$/);
+    else
+        regexRace = RegExp(race);
+    if(req.params.publisher=="")
+        regexPb = RegExp(/^.*$/);
+    else
+        regexPb = RegExp(pb);
+    if(req.params.power=="")
+        regexPower = RegExp(/^.*$/);
+    else
+        regexPower = RegExp(power);
     try {
         const snapshot  = await supInfo.get();
     
         const data = [];
         snapshot.forEach((doc) => {
-            if(regex.test(doc.data().name))
+            if(regexName.test(doc.data().name) && regexRace.test(doc.data().Race) && regexPb.test(doc.data().Publisher))
                 data.push(doc.data());
         });
     
@@ -151,16 +180,7 @@ app.use('/api/superhero_info', router);
 app.use('/api/superhero_powers', router_powers);
 
 //Port
-const port = process.env.PORT || 3001; //environment variable
+const port = process.env.PORT || 5000; //environment variable
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
-
-//Setup serving front-end code
-app.use('/', express.static('../'));
-
-//Setup middleware to do logging
-app.use((req, res, next) => {
-    console.log(`${req.method} request for ${req.url}`);
-    next();
-})
