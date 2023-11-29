@@ -1,5 +1,6 @@
 import {React, useState} from 'react';
-import {IoIosArrowDropdownCircle} from "react-icons/io";
+import {IoIosArrowDropdownCircle, IoIosArrowDropupCircle} from "react-icons/io";
+import '../index.css';
 
 let Search = () => {
     //DOM
@@ -21,12 +22,23 @@ let Search = () => {
         updatePower(event.target.value);
     }
 
-    const [heroes, updateHeroes] = useState([]);
+    //Array initialization
+    const [previewHeroes, updatePreviewHeroes] = useState([]);
 
+    //Expand hero info
+    const [expandedIndexes, updateExpandedIndexes] = useState([]);
+    const handleExpand = (index) => {
+    //Checks whether or not the clicked index is expanded
+    const isExpanded = expandedIndexes.includes(index);
+    //If item is in array, remove it from the array and return the rest, if it isn't, add it to the array
+    updateExpandedIndexes(isExpanded ? expandedIndexes.filter((i) => i !== index) : [...expandedIndexes, index]);
+    };
+
+    //Handles any combination of field searches
     const fieldSearch = async () => {
         try {
             //Clear previous results
-            updateHeroes([]);
+            updatePreviewHeroes([]);
             //Fetch call
             const response = await fetch(`http://localhost:5000/api/superhero_info/search?name=${name}&race=${race}&pb=${pb}&power=${power}`);
             if (!response.ok) {
@@ -34,8 +46,7 @@ let Search = () => {
             }
             const data = await response.json();
             //Iterate through dictionary
-            const newHeroes = Object.values(data).map(hero => `${hero.name} --- ${hero.Publisher}`);
-            updateHeroes(newHeroes);
+            updatePreviewHeroes(data);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -64,18 +75,22 @@ let Search = () => {
                     </div>
                     <button onClick={fieldSearch} className='flex items-center justify-center bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Search</button>
                 </div>
-            <div id='col3' className='font-techFont bg-[#0e7f2c] m-6 px-8 py-4 rounded-xl drop-shadow-lg'>
-                <div id='innerCol1' className='flex items-center justify-center'>
-                    <ul className='text-white font-techFont'>
-                        <li>Results:</li>
-                        {heroes.map((hero, index) => (
-                            <li className='p-2' key={index}>{hero}</li>
+            <div id='col3' className='flex font-techFont m-6 px-8 py-4 rounded-xl drop-shadow-lg'>
+                    <ul className='text-white font-techFont grid grid-cols-3'>
+                        {Object.values(previewHeroes).map((hero, index) => (
+                            <div id='innerCol1' className='flex items-center justify-center bg-[#0e7f2c] rounded-lg p-2 m-4' key={index}>
+                                <li className='p-2'>{expandedIndexes.includes(index) ? (
+                                    <ul>
+                                    {Object.entries(hero).map(([key, value]) => (
+                                        <li key={key}>{`${key}: ${value}`}</li>
+                                    ))}
+                                    </ul>
+                                ) : `${hero.name} --- ${hero.Publisher}`}</li>
+                                {expandedIndexes.includes(index) ? <IoIosArrowDropupCircle size={30} className='icons' onClick={() => handleExpand(index)}/> 
+                                : <IoIosArrowDropdownCircle size={30} className='icons' onClick={() => handleExpand(index)}/>}
+                            </div>
                         ))}
                     </ul>
-                </div>
-                <div id='innerCol2' className='flex items-center justify-center bg-inherit m-2'>
-                    <IoIosArrowDropdownCircle color='white' size={30}/>
-                </div>
             </div>
         </div>
     );
