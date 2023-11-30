@@ -1,14 +1,30 @@
 import React, { useState } from 'react';
 
-const RegistrationPopup = ({ onClose }) => {
-  const [username, setUsername] = useState('');
+const RegistrationPopup = () => {
+  //Keep track of email input
+  const [email, setEmail] = useState('');
+  const handleEmail = (event) => {
+    setEmail(event.target.value);
+  }
+  //Keep track of password input
   const [password, setPassword] = useState('');
+  const handlePassword = (event) => {
+    setPassword(event.target.value);
+  }
 
-  const handleRegistration = () => {
-    // Implement your registration logic here
-    console.log('Registering user:', username);
-    // Close the pop-up after registration
-    onClose();
+  //Keep track of nickname input
+  const [nickname, setNickname] = useState('');
+  const handleNickname = (event) => {
+    setNickname(event.target.value);
+  }
+
+  //Register account to database
+  const handleRegistration = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/users?nickname=${nickname}&email=${email}&password=${password}`);
+    } catch (error) {
+      console.error('Error registering user:', error.message);
+    }
   };
 
   return (
@@ -16,19 +32,19 @@ const RegistrationPopup = ({ onClose }) => {
       <div className="popup-content">
         <h2>Registration</h2>
         <div>
-            <input className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='nickname'></input>
+            <input value={nickname} onChange={handleNickname} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='nickname'></input>
             <hr className='bg-white border-1 border-white'></hr>
         </div>
         <div>
-            <input className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='email'></input>
+            <input value={email} onChange={handleEmail} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='email'></input>
             <hr className='bg-white border-1 border-white'></hr>
         </div>
         <div>
-            <input type='password' className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='password'></input>
+            <input type='password' value={password} onChange={handlePassword} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='password'></input>
             <hr className='bg-white border-1 border-white'></hr>
         </div>
         <button className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3' onClick={handleRegistration}>Register</button>
-        <button className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3' onClick={onClose}>Close</button>
+        <button className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3'>Close</button>
       </div>
     </div>
   );

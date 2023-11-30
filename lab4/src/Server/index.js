@@ -3,6 +3,16 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 const router_powers = express.Router();
+const router_users = express.Router();
+
+//Parse data in body as JSON
+router.use(express.json());
+router_powers.use(express.json());
+
+//Install router at /api/superhero_info and /api/superheroPowers
+app.use('/api/superhero_info', router);
+app.use('/api/superhero_powers', router_powers);
+app.use('/api/users', router_users)
 
 //Cors middleware setup
 const cors = require('cors');
@@ -23,10 +33,7 @@ const db = admin.firestore();
 // Collection refrences
 const supInfo = db.collection('superhero_info');
 const supPowers = db.collection('superhero_powers');
-
-//Parse data in body as JSON
-router.use(express.json());
-router_powers.use(express.json());
+const users = db.collection('users');
 
 //Setup serving front-end code
 app.use('/', express.static('../'));
@@ -37,20 +44,20 @@ app.use((req, res, next) => {
     next();
 })
 
-//Superhero info endpoints
-//Get hero information by ID
-router.get('/yuck/:id', async (req, res) => {
-    const id = parseInt(req.params.id);
+//Register user
+router_users.post('/register', async (req, res) => {
+    const {nickname, email} = req.query;
     try {
-        const snapshot  = await supInfo.get();
-    
-        const data = [];
-        snapshot.forEach((doc) => {
-            if(doc.data().id == id)
-                data.push(doc.data());
+        //Create user in authentication db
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+
+        //Add data about user in firestore
+        const userId = userCredential.user.uid;
+        await firebase.firestore().collection('users').doc(userId).set({
+            email: email,
+            nickname: nickname,
         });
-    
-        res.json(data);
+        res.status(201).send('Verification email sent');
       } catch (error) {
         console.error('Error getting Firestore data:', error);
         res.status(500).send('Internal Server Error');
@@ -77,31 +84,33 @@ router.get('/info/publisher', (req, res) => {
 router.get('/search', async (req, res) => {
     const {name, race, pb, power} = req.query;
     let regexName; let regexRace; let regexPb; let regexPower;
+    //Checking for empty parameters, will match with anything if empty
     if(req.params.name=="")
         regexName = RegExp(/^[a-zA-Z]$/);
     else
         regexName = RegExp(name);
+    //Checking for empty parameters, will match with anything if empty
     if(req.params.race=="")
         regexRace = RegExp(/^[a-zA-Z]$/);
     else
         regexRace = RegExp(race);
+    //Checking for empty parameters, will match with anything if empty
     if(req.params.publisher=="")
         regexPb = RegExp(/^[a-zA-Z]$/);
     else
         regexPb = RegExp(pb);
+    //Checking for empty parameters, will match with anything if empty
     if(req.params.power=="")
         regexPower = RegExp(/^[a-zA-Z]$/);
     else
         regexPower = RegExp(power);
     try {
-        const snapshot  = await supInfo.get();
-    
+        const snapshot  = await supInfo.get();  
         const data = [];
         snapshot.forEach((doc) => {
             if(regexName.test(doc.data().name) && regexRace.test(doc.data().Race) && regexPb.test(doc.data().Publisher))
                 data.push(doc.data());
         });
-    
         res.json(data);
       } catch (error) {
         console.error('Error getting Firestore data:', error);
@@ -174,10 +183,6 @@ router_powers.get('/:id', (req, res) => {
         res.status(404).send(`Superhero ${name} does not have powers`);
     }
 })
-
-//Install router at /api/superhero_info and /api/superheroPowers
-app.use('/api/superhero_info', router);
-app.use('/api/superhero_powers', router_powers);
 
 //Port
 const port = process.env.PORT || 5000; //environment variable
