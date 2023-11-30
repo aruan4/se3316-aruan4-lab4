@@ -21,7 +21,16 @@ const RegistrationPopup = () => {
   //Register account to database
   const handleRegistration = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users?nickname=${nickname}&email=${email}&password=${password}`);
+      const credentials = {
+        nickname: nickname,
+        email: email,
+        password: password
+      }
+      const response = await fetch(`http://localhost:5000/api/users/register`, {
+        method: "POST",
+        headers: {'Content-Type': 'application/jsonl charset=UTF-8'},
+        body: JSON.stringify(credentials)
+      });
     } catch (error) {
       console.error('Error registering user:', error.message);
     }

@@ -8,6 +8,7 @@ const router_users = express.Router();
 //Parse data in body as JSON
 router.use(express.json());
 router_powers.use(express.json());
+router_users.use(express.json());
 
 //Install router at /api/superhero_info and /api/superheroPowers
 app.use('/api/superhero_info', router);
@@ -28,12 +29,31 @@ admin.initializeApp({
   databaseURL: "se3316-aruan4-lab4.firebaseapp.com",
 });
 
-// Initialize Firestore
+//Initializing Firebase
+const { initializeApp } = require("firebase/app");
+const firebaseConfig = {
+    apiKey: "AIzaSyD1iggIQhfsllbNHIK0Zf44aVwWQDHm3Iw",
+    authDomain: "se3316-aruan4-lab4.firebaseapp.com",
+    projectId: "se3316-aruan4-lab4",
+    storageBucket: "se3316-aruan4-lab4.appspot.com",
+    messagingSenderId: "297630781353",
+    appId: "1:297630781353:web:0c43c277fda27d2d1dfeb8",
+    measurementId: "G-YM4TR39SGV"
+  };
+  
+// Initialize Firebase
+const firebase = initializeApp(firebaseConfig);
+//Auth
+const { getAuth, createUserWithEmailAndPassword } = require('firebase/auth')
+const auth = getAuth();
+
+//Initialize Firestore
 const db = admin.firestore();
-// Collection refrences
+
+// Collection references
 const supInfo = db.collection('superhero_info');
 const supPowers = db.collection('superhero_powers');
-const users = db.collection('users');
+const usersDb = db.collection('users');
 
 //Setup serving front-end code
 app.use('/', express.static('../'));
@@ -46,16 +66,17 @@ app.use((req, res, next) => {
 
 //Register user
 router_users.post('/register', async (req, res) => {
-    const {nickname, email} = req.query;
+    const login = req.body;
     try {
+        console.log(login);
         //Create user in authentication db
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const userCredential = await createUserWithEmailAndPassword(auth, login.email, login.password);
 
         //Add data about user in firestore
         const userId = userCredential.user.uid;
-        await firebase.firestore().collection('users').doc(userId).set({
-            email: email,
-            nickname: nickname,
+        await usersDb.doc(userId).set({
+            email: login.email,
+            nickname: login.nickname,
         });
         res.status(201).send('Verification email sent');
       } catch (error) {
@@ -119,9 +140,10 @@ router.get('/search', async (req, res) => {
 });
 
 //POST a new list of superhero IDs
-router.post('/list/create/', (req, res) => {
+router.post('/list/create', (req, res) => {
     //Create a new list
     const list = req.body;
+    console.log(list);
     if(list.name){
         storage.put(list.name, list.ids);
         res.send(list); 
