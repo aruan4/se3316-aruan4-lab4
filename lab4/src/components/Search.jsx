@@ -39,8 +39,15 @@ let Search = () => {
         try {
             //Clear previous results
             updatePreviewHeroes([]);
+            //Parameters
+            const params = new URLSearchParams({
+                name: name,
+                race: race,
+                pb: pb,
+                power: power,
+            });
             //Fetch call
-            const response = await fetch(`http://localhost:5000/api/superhero_info/search?name=${name}&race=${race}&pb=${pb}&power=${power}`);
+            const response = await fetch(`http://localhost:5000/api/superhero_info/search?${params}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

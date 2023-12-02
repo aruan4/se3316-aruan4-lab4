@@ -19,6 +19,12 @@ app.use('/api/users', router_users)
 const cors = require('cors');
 app.use(cors());
 
+//Setup middleware to do logging
+app.use((req, res, next) => {
+    console.log(`${req.method} request for ${req.url}`);
+    next();
+})
+
 //Firebase initialization
 const admin = require('firebase-admin');
 
@@ -55,20 +61,10 @@ const supInfo = db.collection('superhero_info');
 const supPowers = db.collection('superhero_powers');
 const usersDb = db.collection('users');
 
-//Setup serving front-end code
-app.use('/', express.static('../'));
-
-//Setup middleware to do logging
-app.use((req, res, next) => {
-    console.log(`${req.method} request for ${req.url}`);
-    next();
-})
-
 //Register user
 router_users.post('/register', async (req, res) => {
     const login = req.body;
     try {
-        console.log(login);
         //Create user in authentication db
         const userCredential = await createUserWithEmailAndPassword(auth, login.email, login.password);
 
@@ -132,7 +128,7 @@ router.get('/search', async (req, res) => {
             if(regexName.test(doc.data().name) && regexRace.test(doc.data().Race) && regexPb.test(doc.data().Publisher))
                 data.push(doc.data());
         });
-        res.json(data);
+        res.send(data);
       } catch (error) {
         console.error('Error getting Firestore data:', error);
         res.status(500).send('Internal Server Error');
