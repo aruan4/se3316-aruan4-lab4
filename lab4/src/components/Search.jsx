@@ -1,5 +1,6 @@
 import {React, useState} from 'react';
 import {IoIosArrowDropdownCircle, IoIosArrowDropupCircle} from "react-icons/io";
+import { SiDuckduckgo } from "react-icons/si";
 import '../index.css';
 
 let Search = () => {
@@ -59,6 +60,13 @@ let Search = () => {
         }
     }
 
+    //Duckduckgo search
+    const Duckduckgo = (name) => {
+        const encodedQuery = encodeURIComponent(name);
+        const duckDuckGoURL = `https://duckduckgo.com/?q=${encodedQuery}`;
+        window.open(duckDuckGoURL, '_blank');
+    }
+
     return(
         <div className='px-16 py-8 m-8'>
             <h1 className='flex justify-center text-[#12a93b] font-techFont text-2xl pb-6'>Search for a hero</h1>
@@ -86,6 +94,7 @@ let Search = () => {
                     <ul className='text-white font-techFont grid grid-cols-3'>
                         {Object.values(previewHeroes).map((hero, index) => (
                             <div id='innerCol1' className='flex items-center justify-center bg-[#0e7f2c] rounded-lg p-2 m-4' key={index}>
+                                <SiDuckduckgo size={30} className='icons' onClick={() => Duckduckgo(hero.name)}/>
                                 <li className='p-2'>{expandedIndexes.includes(index) ? (
                                     <ul>
                                     {Object.entries(hero).map(([key, value]) => (

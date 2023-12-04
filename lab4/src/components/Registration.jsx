@@ -28,8 +28,8 @@ const RegistrationPopup = () => {
       }
       const response = await fetch(`http://localhost:5000/api/users/register`, {
         method: "POST",
-        headers: {'Content-Type': 'application/jsonl charset=UTF-8'},
-        body: JSON.stringify(credentials)
+        headers: {'Content-Type': "application/json"},
+        body: JSON.stringify(credentials),
       });
       alert(response.data);
     } catch (error) {

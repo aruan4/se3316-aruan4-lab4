@@ -17,7 +17,6 @@ app.use('/api/users', router_users)
 
 //Cors middleware setup
 const cors = require('cors');
-app.use(cors());
 
 //Setup middleware to do logging
 app.use((req, res, next) => {
@@ -50,7 +49,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig);
 //Auth
-const { getAuth, createUserWithEmailAndPassword } = require('firebase/auth')
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth')
 const auth = getAuth();
 
 //Initialize Firestore
@@ -60,10 +59,13 @@ const db = admin.firestore();
 const supInfo = db.collection('superhero_info');
 const supPowers = db.collection('superhero_powers');
 const usersDb = db.collection('users');
+const listsDb = db.collection('lists');
 
 //Register user
 router_users.post('/register', cors(), async (req, res) => {
-    console.log('meow')
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.header('Access-Control-Allow-Methods', 'POST');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     const login = req.body;
     try {
         //Create user in authentication db
@@ -82,21 +84,21 @@ router_users.post('/register', cors(), async (req, res) => {
       }
 });
 
-//Get all publishers
-router.get('/info/publisher', cors(), (req, res) => {
-    const publishers = {};
-    for(hero in superhero_info){
-        if(publishers[superhero_info[hero].Publisher] == null){
-            //Create new dictionary entry of ${publisher}: 1
-            publishers[superhero_info[hero].Publisher] = 1;
-        }
-        else{
-            //Already exists, += 1 to existing entry
-            publishers[superhero_info[hero].Publisher] += 1
-        }
+//Login User
+router_users.post('/login', cors(), async (req, res) => {
+    const credentials = req.body;
+    console.log(credentials.email, credentials.password);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+      const user = userCredential.user;
+  
+      // You can customize the response based on your requirements
+      res.status(200).json({ uid: user.uid, email: user.email });
+    } catch (error) {
+      console.error('Error logging in:', error.message);
+      res.status(401).json({ error: 'Invalid credentials' });
     }
-    res.send(Object.keys(publishers));
-});
+  });
 
 //Get based on fields
 router.get('/search',cors(), async (req, res) => {
@@ -202,6 +204,23 @@ router_powers.get('/:id', cors(), (req, res) => {
         res.status(404).send(`Superhero ${name} does not have powers`);
     }
 })
+
+//Get all publishers
+router.get('/info/publisher', cors(), (req, res) => {
+    const publishers = {};
+    for(hero in superhero_info){
+        if(publishers[superhero_info[hero].Publisher] == null){
+            //Create new dictionary entry of ${publisher}: 1
+            publishers[superhero_info[hero].Publisher] = 1;
+        }
+        else{
+            //Already exists, += 1 to existing entry
+            publishers[superhero_info[hero].Publisher] += 1
+        }
+    }
+    res.send(Object.keys(publishers));
+});
+
 
 //Port
 const port = process.env.PORT || 5000; //environment variable
