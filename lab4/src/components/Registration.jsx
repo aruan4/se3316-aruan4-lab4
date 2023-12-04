@@ -31,6 +31,7 @@ const RegistrationPopup = () => {
         headers: {'Content-Type': 'application/jsonl charset=UTF-8'},
         body: JSON.stringify(credentials)
       });
+      alert(response.data);
     } catch (error) {
       console.error('Error registering user:', error.message);
     }

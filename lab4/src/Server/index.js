@@ -19,6 +19,12 @@ app.use('/api/users', router_users)
 const cors = require('cors');
 app.use(cors());
 
+//Setup middleware to do logging
+app.use((req, res, next) => {
+    console.log(`${req.method} request for ${req.url}`);
+    next();
+})
+
 //Firebase initialization
 const admin = require('firebase-admin');
 
@@ -55,17 +61,9 @@ const supInfo = db.collection('superhero_info');
 const supPowers = db.collection('superhero_powers');
 const usersDb = db.collection('users');
 
-//Setup serving front-end code
-app.use('/', express.static('../'));
-
-//Setup middleware to do logging
-app.use((req, res, next) => {
-    console.log(`${req.method} request for ${req.url}`);
-    next();
-})
-
 //Register user
-router_users.post('/register', async (req, res) => {
+router_users.post('/register', cors(), async (req, res) => {
+    console.log('meow')
     const login = req.body;
     try {
         //Create user in authentication db
@@ -85,7 +83,7 @@ router_users.post('/register', async (req, res) => {
 });
 
 //Get all publishers
-router.get('/info/publisher', (req, res) => {
+router.get('/info/publisher', cors(), (req, res) => {
     const publishers = {};
     for(hero in superhero_info){
         if(publishers[superhero_info[hero].Publisher] == null){
@@ -101,7 +99,7 @@ router.get('/info/publisher', (req, res) => {
 });
 
 //Get based on fields
-router.get('/search', async (req, res) => {
+router.get('/search',cors(), async (req, res) => {
     const {name, race, pb, power} = req.query;
     let regexName; let regexRace; let regexPb; let regexPower;
     //Checking for empty parameters, will match with anything if empty
@@ -131,7 +129,7 @@ router.get('/search', async (req, res) => {
             if(regexName.test(doc.data().name) && regexRace.test(doc.data().Race) && regexPb.test(doc.data().Publisher))
                 data.push(doc.data());
         });
-        res.json(data);
+        res.send(data);
       } catch (error) {
         console.error('Error getting Firestore data:', error);
         res.status(500).send('Internal Server Error');
@@ -139,7 +137,7 @@ router.get('/search', async (req, res) => {
 });
 
 //POST a new list of superhero IDs
-router.post('/list/create', (req, res) => {
+router.post('/list/create', cors(), (req, res) => {
     //Create a new list
     const list = req.body;
     console.log(list);
@@ -153,7 +151,7 @@ router.post('/list/create', (req, res) => {
 });
 
 //GET an existing list and view IDs
-router.get('/list/view/:name', (req, res) => {
+router.get('/list/view/:name', cors(), (req, res) => {
     //Search through storage for a certain list name
     if(storage.get(req.params.name)){
         res.send(storage.get(req.params.name));
@@ -164,7 +162,7 @@ router.get('/list/view/:name', (req, res) => {
 });
 
 //Delete an existing list
-router.delete('/list/delete', (req, res) => {
+router.delete('/list/delete', cors(), (req, res) => {
     //Search through storage for a certain list name
     let list = req.body;
     if(storage.get(list.name)){
@@ -177,7 +175,7 @@ router.delete('/list/delete', (req, res) => {
 });
 
 //Get all lists
-router.get('/list/all', (req, res) => {
+router.get('/list/all', cors(), (req, res) => {
     let keys = [];
     for(key in storage.store){
         keys.push(key);
@@ -187,7 +185,7 @@ router.get('/list/all', (req, res) => {
 
 //Superhero powers endpoints
 //Get powers by ID
-router_powers.get('/:id', (req, res) => {
+router_powers.get('/:id', cors(), (req, res) => {
     const id = req.params.id;
     let name = "" //Placeholder
     //Get hero name to look for powers
