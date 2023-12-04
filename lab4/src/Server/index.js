@@ -68,7 +68,6 @@ app.use((req, res, next) => {
 router_users.post('/register', async (req, res) => {
     const login = req.body;
     try {
-        console.log(login);
         //Create user in authentication db
         const userCredential = await createUserWithEmailAndPassword(auth, login.email, login.password);
 
