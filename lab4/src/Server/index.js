@@ -87,7 +87,6 @@ router_users.post('/register', cors(), async (req, res) => {
 //Login User
 router_users.post('/login', cors(), async (req, res) => {
     const credentials = req.body;
-    console.log(credentials.email, credentials.password);
     try {
       const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
       const user = userCredential.user;
@@ -133,7 +132,7 @@ router.get('/search',cors(), async (req, res) => {
         });
         res.send(data);
       } catch (error) {
-        console.error('Error getting Firestore data:', error);
+        console.log('Error getting Firestore data:', error);
         res.status(500).send('Internal Server Error');
       }
 });
@@ -152,14 +151,35 @@ router.post('/list/create', cors(), (req, res) => {
     }
 });
 
-//GET an existing list and view IDs
-router.get('/list/view/:name', cors(), (req, res) => {
-    //Search through storage for a certain list name
-    if(storage.get(req.params.name)){
-        res.send(storage.get(req.params.name));
+//GET an existing list and view information
+router_users.get('/lists/view', cors(), async (req, res) => {
+    //Check who is logged in currently
+    const currentUser = auth.currentUser;
+    if(currentUser) {
+        console.log("User is logged in:", currentUser.uid);
+    } else {
+        console.log("No user is currently logged in.");
     }
-    else{
-        res.status(400).send('Missing name');
+    //Get the email of the user so we can match it to a nickname
+    const userSnapshot = await usersDb.get();
+    let userNickname = undefined;
+    userSnapshot.forEach((doc) => {
+        if(doc.data().email = currentUser.email){
+            userNickname = doc.data().nickname;
+        }
+    })
+    try {
+        //Search through firestore for a certain list name and corrosponding nickname
+        const snapshot  = await listsDb.get();
+        let data = undefined;
+        snapshot.forEach((doc) => {
+            if(doc.data().nickname == userNickname)
+                data = (doc.data());
+        });
+        res.send(data);
+    } catch (error) {
+        console.log('Error getting Firestore data:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 
