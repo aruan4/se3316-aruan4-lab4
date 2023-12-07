@@ -15,9 +15,6 @@ app.use('/api/superhero_info', router);
 app.use('/api/superhero_powers', router_powers);
 app.use('/api/users', router_users)
 
-//Cors middleware setup
-const cors = require('cors');
-
 //Setup middleware to do logging
 app.use((req, res, next) => {
     console.log(`${req.method} request for ${req.url}`);
@@ -62,7 +59,7 @@ const usersDb = db.collection('users');
 const listsDb = db.collection('lists');
 
 //Register user
-router_users.post('/register', cors(), async (req, res) => {
+router_users.post('/register', async (req, res) => {
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.header('Access-Control-Allow-Methods', 'POST');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -85,7 +82,7 @@ router_users.post('/register', cors(), async (req, res) => {
 });
 
 //Login User
-router_users.post('/login', cors(), async (req, res) => {
+router_users.post('/login', async (req, res) => {
     const credentials = req.body;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
@@ -100,7 +97,7 @@ router_users.post('/login', cors(), async (req, res) => {
   });
 
 //Get based on fields
-router.get('/search',cors(), async (req, res) => {
+router.get('/search',async (req, res) => {
     const {name, race, pb, power} = req.query;
     let regexName; let regexRace; let regexPb; let regexPower;
     //Checking for empty parameters, will match with anything if empty
@@ -138,7 +135,7 @@ router.get('/search',cors(), async (req, res) => {
 });
 
 //POST a new list of superhero IDs
-router.post('/list/create', cors(), (req, res) => {
+router.post('/list/create', (req, res) => {
     //Create a new list
     const list = req.body;
     console.log(list);
@@ -152,7 +149,7 @@ router.post('/list/create', cors(), (req, res) => {
 });
 
 //GET an existing list and view information
-router_users.get('/lists/view', cors(), async (req, res) => {
+router_users.get('/lists/view', async (req, res) => {
     //Check who is logged in currently
     const currentUser = auth.currentUser;
     if(currentUser) {
@@ -184,7 +181,7 @@ router_users.get('/lists/view', cors(), async (req, res) => {
 });
 
 //Delete an existing list
-router.delete('/list/delete', cors(), (req, res) => {
+router.delete('/list/delete', (req, res) => {
     //Search through storage for a certain list name
     let list = req.body;
     if(storage.get(list.name)){
@@ -197,7 +194,7 @@ router.delete('/list/delete', cors(), (req, res) => {
 });
 
 //Get all lists
-router.get('/list/all', cors(), (req, res) => {
+router.get('/list/all', (req, res) => {
     let keys = [];
     for(key in storage.store){
         keys.push(key);
@@ -207,7 +204,7 @@ router.get('/list/all', cors(), (req, res) => {
 
 //Superhero powers endpoints
 //Get powers by ID
-router_powers.get('/:id', cors(), (req, res) => {
+router_powers.get('/:id', (req, res) => {
     const id = req.params.id;
     let name = "" //Placeholder
     //Get hero name to look for powers
@@ -226,7 +223,7 @@ router_powers.get('/:id', cors(), (req, res) => {
 })
 
 //Get all publishers
-router.get('/info/publisher', cors(), (req, res) => {
+router.get('/info/publisher', (req, res) => {
     const publishers = {};
     for(hero in superhero_info){
         if(publishers[superhero_info[hero].Publisher] == null){
