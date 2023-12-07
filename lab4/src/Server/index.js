@@ -58,12 +58,21 @@ const supPowers = db.collection('superhero_powers');
 const usersDb = db.collection('users');
 const listsDb = db.collection('lists');
 
+//Email validator
+const validator = require('validator');
+
 //Register user
 router_users.post('/register', async (req, res) => {
+<<<<<<< HEAD
     res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.header('Access-Control-Allow-Methods', 'POST');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+=======
+>>>>>>> 05aa1277140ef43c700bd01f4ed3958f7f90b670
     const login = req.body;
+    if (!validator.isEmail(login.email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
     try {
         //Create user in authentication db
         const userCredential = await createUserWithEmailAndPassword(auth, login.email, login.password);
@@ -135,6 +144,7 @@ router.get('/search',async (req, res) => {
 });
 
 //POST a new list of superhero IDs
+<<<<<<< HEAD
 router.post('/list/create', (req, res) => {
     //Create a new list
     const list = req.body;
@@ -145,7 +155,24 @@ router.post('/list/create', (req, res) => {
     }
     else{
         res.status(400).send('Missing name');
+=======
+router.post('/list/create', async (req, res) => {
+    //Check who is logged in currently
+    const currentUser = auth.currentUser;
+    if(currentUser) {
+        console.log("User is logged in:", currentUser.uid);
+    } else {
+        console.log("No user is currently logged in.");
+>>>>>>> 05aa1277140ef43c700bd01f4ed3958f7f90b670
     }
+    //Get the email of the user so we can match it to a nickname
+    const userSnapshot = await usersDb.get();
+    let userNickname = undefined;
+    userSnapshot.forEach((doc) => {
+        if(doc.data().email = currentUser.email){
+            userNickname = doc.data().nickname;
+        }
+    })
 });
 
 //GET an existing list and view information
@@ -168,10 +195,10 @@ router_users.get('/lists/view', async (req, res) => {
     try {
         //Search through firestore for a certain list name and corrosponding nickname
         const snapshot  = await listsDb.get();
-        let data = undefined;
+        let data = [];
         snapshot.forEach((doc) => {
             if(doc.data().nickname == userNickname)
-                data = (doc.data());
+                data.push(doc.data());
         });
         res.send(data);
     } catch (error) {

@@ -27,19 +27,15 @@ let MyLists = () => {
             //Clear previous results
             updateLists([]);
             //Fetch call
-            const response = await fetch(`http://localhost:5000/api/users/lists/view`);
+            const response = await fetch(`http://localhost:5000/api/users/lists/view`,{
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             //Organize the data into a json object
             const data = await response.json();
-            const temp = {
-                heroes: data.heroes,
-                listName: data.listName,
-                nickname: data.nickname
-            }
             //Add to lists and add names to names list
-            updateLists(temp);
+            updateLists(data);
             displayList();
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -67,22 +63,22 @@ let MyLists = () => {
                 <div id='col1' className=' m-4 p-2 grid grid-rows-2 justify-center rounded-lg bg-[#0e7f2c]'>
                     <ul>
                         <li className='justify-center flex items-center text-xl'>My Lists</li>
-                        {/*Object.values(lists).map((maow, index) => (
+                        {lists.map((maow, index) => (
                             <div key={index} className='flex items-center'>
-                                <li className='text-white'>{JSON.stringify(maow)}</li>
+                                <li className='text-white'>{maow.listName}</li>
                                 {expandedIndexes.includes(index) ? <IoIosArrowDropleftCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/> 
                                 : <IoIosArrowDroprightCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/>}
                             </div>
-                        ))*/}
+                        ))}
                     </ul>
                 </div>
-                {Object.values(lists).map((hero, index) =>{
+                {/*Object.values(lists).map((hero, index) =>{
                     <div id='col2' className={expandedIndexes.includes(index) ? 'm-4 p-2 grid grid-rows-2 justify-center col-span-2 rounded-lg bg-[#0e7f2c]' : 'translate-x-[100%]'}>
                         <ul className='relative'>
                         
                         </ul>
                 </div>
-                })}
+                })*/}
             </div>
         </div>
     );
