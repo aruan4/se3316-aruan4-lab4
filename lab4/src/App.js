@@ -1,18 +1,17 @@
 import React from 'react';
-import Home from './components/Home';
-import Login from './components/Login';
-import Search from './components/Search';
-import PopularLists from './components/PopularLists';
-import MyLists from './components/MyLists';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Guestpage from './components/Guestpage';
+import Userpage from './components/Userpage';
 
 function App() {
   return (
     <div className='font-techFont'>
-      <Login/>
-      <Home/>
-      <Search/>
-      <PopularLists/>
-      <MyLists/>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Guestpage/>}/>
+          <Route path="/user" element={<Userpage/>}/>
+        </Routes>
+      </Router>
     </div>
   );
 }

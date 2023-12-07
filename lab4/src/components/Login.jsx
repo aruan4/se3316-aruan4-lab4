@@ -23,10 +23,6 @@ const Login = function(){
     }
 
     //Login
-    const [loggedIn, setLogin] = useState(false);
-    const handleLogin = () => {
-        setLogin(!loggedIn);
-    }
     const login = async () => {
         try {
             const credentials = {
@@ -39,7 +35,6 @@ const Login = function(){
                 body: JSON.stringify(credentials),
                 credentials: 'include',
             })
-            handleLogin();
             alert(response);
         } catch (error){
             console.error('Error logging in user:', error.message);
@@ -48,7 +43,7 @@ const Login = function(){
 
     return(
         <div className='flex justify-between items-center max-w-[1240px] mx-auto px-4 text-white'>
-            {loggedIn ? <h1 className='text-4xl font-techFont text-[#12a93b]'>Meow</h1> : <h1 className='text-4xl font-techFont text-[#12a93b]'>SuperheroDB</h1>}
+            <h1 className='text-4xl font-techFont text-[#12a93b]'>SuperheroDB</h1>
             <div className='m-2'>
                 <input value={email} onChange={handleEmail} className='bg-[#1a1919] w-full rounded-md placeholder-white text-white' placeholder='email'></input>
                 <hr className='bg-white border-1 border-white'></hr>
@@ -57,7 +52,9 @@ const Login = function(){
                 <input value={password} onChange={handlePassword} className='bg-[#1a1919] w-full rounded-md placeholder-white text-white' placeholder='password'></input>
                 <hr className='bg-white border-1 border-white'></hr>
             </div>
-            <button onClick={login} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Login</button>
+            <a href='/user'>
+                <button onClick={login} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Login</button>
+            </a>
             {!isRegistrationOpen ? <button onClick={openReg} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Register</button> : null}
             <div>
                 {isRegistrationOpen && (<RegistrationPopup onClose={closeReg} />)}
