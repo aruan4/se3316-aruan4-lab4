@@ -15,6 +15,9 @@ app.use('/api/superhero_info', router);
 app.use('/api/superhero_powers', router_powers);
 app.use('/api/users', router_users)
 
+// const cors = require('cors');
+// app.use(cors());
+
 //Setup middleware to do logging
 app.use((req, res, next) => {
     console.log(`${req.method} request for ${req.url}`);
@@ -46,7 +49,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig);
 //Auth
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } = require('firebase/auth')
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = require('firebase/auth')
 const auth = getAuth();
 
 //Initialize Firestore
@@ -63,15 +66,9 @@ const validator = require('validator');
 
 //Register user
 router_users.post('/register', async (req, res) => {
-<<<<<<< HEAD
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.header('Access-Control-Allow-Methods', 'POST');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-=======
->>>>>>> 05aa1277140ef43c700bd01f4ed3958f7f90b670
     const login = req.body;
     if (!validator.isEmail(login.email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
+        return res.status(400).send('Invalid email format');
       }
     try {
         //Create user in authentication db
@@ -83,10 +80,9 @@ router_users.post('/register', async (req, res) => {
             email: login.email,
             nickname: login.nickname,
         });
-        res.status(201).send('Verification email sent');
+        res.send('Verification email sent');
       } catch (error) {
-        console.error('Error getting Firestore data:', error);
-        res.status(500).send('Internal Server Error');
+        res.send('Internal Server Error');
       }
 });
 
@@ -100,13 +96,40 @@ router_users.post('/login', async (req, res) => {
       // You can customize the response based on your requirements
       res.status(200).json({ uid: user.uid, email: user.email });
     } catch (error) {
-      console.error('Error logging in:', error.message);
-      res.status(401).json({ error: 'Invalid credentials' });
+      res.status(401).send('Invalid credentials');
     }
   });
 
+//Logout User
+router_users.post('/logout', async (req, res) => {
+    try {
+        await signOut();
+        console.log('Signed out!');
+    } catch (error) {
+        console.log('Error logging out:', error.message);
+    }
+});
+
+//Get heroes based on ID
+router.get('/searchid', async (req, res) => {
+    const id = req.query;
+    console.log(id);
+    try {
+        const snapshot  = await supInfo.get();
+        let data = null;  
+        snapshot.forEach((doc) => {
+            if(doc.data().id == id.id){
+                data = doc.data();
+            }
+        });
+        res.send(data);
+    } catch (error) {
+        res.send('Error getting data from firestore');
+    }
+})
+
 //Get based on fields
-router.get('/search',async (req, res) => {
+router.get('/search', async (req, res) => {
     const {name, race, pb, power} = req.query;
     let regexName; let regexRace; let regexPb; let regexPower;
     //Checking for empty parameters, will match with anything if empty
@@ -136,6 +159,20 @@ router.get('/search',async (req, res) => {
             if(regexName.test(doc.data().name) && regexRace.test(doc.data().Race) && regexPb.test(doc.data().Publisher))
                 data.push(doc.data());
         });
+        const powersSnapshot = await supPowers.where('hero_names', 'in', data.map(item => item.name)).get();
+        powersSnapshot.forEach((doc) => {
+            const matchingHero = data.find(item => item.name === doc.data().hero_names);
+            if (matchingHero) {
+                const powers = Object.keys(doc.data()).filter(key => (key !== 'hero_names' && doc.data()[key] === "True"))
+                .filter(key => regexPower.test(key));;
+                matchingHero.Powers = powers;
+            }
+        });
+        for(let i in data){
+            if(data[i].Powers.length == 0){
+                data.splice(data.indexOf(data[i]),1);
+            }
+        }
         res.send(data);
       } catch (error) {
         console.log('Error getting Firestore data:', error);
@@ -144,35 +181,30 @@ router.get('/search',async (req, res) => {
 });
 
 //POST a new list of superhero IDs
-<<<<<<< HEAD
-router.post('/list/create', (req, res) => {
-    //Create a new list
-    const list = req.body;
-    console.log(list);
-    if(list.name){
-        storage.put(list.name, list.ids);
-        res.send(list); 
-    }
-    else{
-        res.status(400).send('Missing name');
-=======
 router.post('/list/create', async (req, res) => {
-    //Check who is logged in currently
-    const currentUser = auth.currentUser;
-    if(currentUser) {
-        console.log("User is logged in:", currentUser.uid);
-    } else {
-        console.log("No user is currently logged in.");
->>>>>>> 05aa1277140ef43c700bd01f4ed3958f7f90b670
-    }
-    //Get the email of the user so we can match it to a nickname
-    const userSnapshot = await usersDb.get();
-    let userNickname = undefined;
-    userSnapshot.forEach((doc) => {
-        if(doc.data().email = currentUser.email){
-            userNickname = doc.data().nickname;
+    const listDetails = req.body;
+    try {
+        //Check who is logged in currently
+        const currentUser = auth.currentUser;
+        if(currentUser) {
+            console.log("User is logged in:", currentUser.uid);
+        } else {
+            console.log("No user is currently logged in.");
+            res.send('Not logged in');
         }
-    })
+        //Get the email of the user so we can match it to a nickname
+        const userSnapshot = await usersDb.get();
+        userSnapshot.forEach((doc) => {
+            if(doc.data().email = currentUser.email){
+                listDetails.nickname = doc.data().nickname;
+            }
+        });
+        //Add list to collection
+        const docRef = await listsDb.add(listDetails)
+        console.log('Document written with ID: ', docRef.id);
+    } catch (error) {
+        console.log('Error adding document');
+    }
 });
 
 //GET an existing list and view information

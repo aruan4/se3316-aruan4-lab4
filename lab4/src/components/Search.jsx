@@ -48,7 +48,7 @@ let Search = () => {
                 power: power,
             });
             //Fetch call
-            const response = await fetch(`http://localhost:5000/api/superhero_info/search?${params}`);
+            const response = await fetch(`/api/superhero_info/search?${params}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -91,7 +91,7 @@ let Search = () => {
                     <button onClick={fieldSearch} className='flex items-center justify-center bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Search</button>
                 </div>
             <div id='col3' className='flex font-techFont m-6 px-8 py-4 rounded-xl drop-shadow-lg'>
-                    <ul className='text-white font-techFont grid grid-cols-3'>
+                    <ul className='text-white items-center justify-center font-techFont grid grid-cols-2'>
                         {Object.values(previewHeroes).map((hero, index) => (
                             <div id='innerCol1' className='flex items-center justify-center bg-[#0e7f2c] rounded-lg p-2 m-4' key={index}>
                                 <SiDuckduckgo size={30} className='icons' onClick={() => Duckduckgo(hero.name)}/>

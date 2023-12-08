@@ -1,5 +1,6 @@
 import {React, useState} from 'react';
 import RegistrationPopup from './Registration';
+import { useNavigate } from 'react-router-dom';
 
 const Login = function(){ 
     //Registration logic
@@ -22,6 +23,9 @@ const Login = function(){
         setPassword(event.target.value);
     }
 
+    //Redirect
+    const naviagte = useNavigate();
+
     //Login
     const login = async () => {
         try {
@@ -29,15 +33,18 @@ const Login = function(){
                 email: email,
                 password: password,
             }
-            const response = await fetch(`http://localhost:5000/api/users/login`, {
+            const response = await fetch(`/api/users/login`, {
                 method: 'POST',
                 headers: {"Content-Type": 'application/json'},
                 body: JSON.stringify(credentials),
-                credentials: 'include',
-            })
-            alert(response);
+            });
+            if(response.ok)
+                naviagte('/user');
+            else
+                alert(response.statusText);
         } catch (error){
-            console.error('Error logging in user:', error.message);
+            alert('Incorrect credentials');
+            console.error('Error logging in user:');
         }
     }
 
@@ -49,12 +56,10 @@ const Login = function(){
                 <hr className='bg-white border-1 border-white'></hr>
             </div>
             <div className='m-2'>
-                <input value={password} onChange={handlePassword} className='bg-[#1a1919] w-full rounded-md placeholder-white text-white' placeholder='password'></input>
+                <input type='password' value={password} onChange={handlePassword} className='bg-[#1a1919] w-full rounded-md placeholder-white text-white' placeholder='password'></input>
                 <hr className='bg-white border-1 border-white'></hr>
             </div>
-            <a href='/user'>
-                <button onClick={login} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Login</button>
-            </a>
+            <button onClick={login} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Login</button>
             {!isRegistrationOpen ? <button onClick={openReg} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Register</button> : null}
             <div>
                 {isRegistrationOpen && (<RegistrationPopup onClose={closeReg} />)}

@@ -3,14 +3,7 @@ import {IoIosArrowDropleftCircle, IoIosArrowDroprightCircle} from "react-icons/i
 import '../index.css';
 
 let MyLists = () => {
-    const [listInfo, infoState] = useState(false);
-
-    let handleInfo = () => {
-        infoState(!listInfo);
-    }
-
     //Lists
-    const [names, updateNames] = useState([]);
     const [lists, updateLists] = useState([]);
     //Expand hero info
     const [expandedIndexes, updateExpandedIndexes] = useState([]);
@@ -21,13 +14,51 @@ let MyLists = () => {
     updateExpandedIndexes(isExpanded ? expandedIndexes.filter((i) => i !== index) : [...expandedIndexes, index]);
     };
 
+    const [listName, setListName] = useState('');
+    const handleListName = (event) => {
+        setListName(event.target.value);
+    }    
+    const [heroes, setHeroes] = useState([]);
+    const handleHeroes = (event) => {
+        setHeroes(event.target.value);
+    }
+    const [description, setDescription] = useState('');
+    const handleDescription = (event) => {
+        setDescription(event.target.value);
+    }
+    //Create list method
+    const create = async () => {
+        let cleaned_heroes = heroes.split(",");
+        let temp = [];
+        for(let i in cleaned_heroes){
+            temp.push(await fetch(`/api/superhero_info/searchid?id=${cleaned_heroes[i]}`));
+        }
+
+        const listDetails = {
+            listName: listName,
+            heroes: temp,
+            description: description
+        }
+        try {
+            const response = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: {"Content-Type": 'application/json'},
+                body: JSON.stringify(listDetails),
+            });
+            let data = response.json();
+            updateLists([...lists, data]);
+        } catch (error) {
+            
+        }
+    }
+
     //Getting user's lists
     const getList = async () => {
         try {
             //Clear previous results
             updateLists([]);
             //Fetch call
-            const response = await fetch(`http://localhost:5000/api/users/lists/view`,{
+            const response = await fetch(`/api/users/lists/view`,{
             });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -59,26 +90,40 @@ let MyLists = () => {
                 <h1 className='flex justify-center items-center text-[#12a93b] text-2xl drop-shadow-lg p-6'>My Lists</h1>
                 <button onClick={getList} className='flex items-center justify-center bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Get my lists</button>
             </div>
+            <div>
+            <div className='m-4 p-4 bg-[#242323] font-techFont grid items-center justify-center'>
+            <div className="popup-content">
+                <h2 className='text-white'>Create a list</h2>
+                <div>
+                    <input onChange={handleListName} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='list name'></input>
+                    <hr className='bg-white border-1 border-white'></hr>
+                </div>
+                <div>
+                    <textarea onChange={handleHeroes} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='heroes (by id)'></textarea>
+                    <hr className='bg-white border-1 border-white'></hr>
+                </div>
+                <div>
+                    <textarea onChange={handleDescription} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='description'></textarea>
+                    <hr className='bg-white border-1 border-white'></hr>
+                </div>
+                <button onClick={create} className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3'>Create</button>
+                <button className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3'>Close</button>
+            </div>
+        </div>
+            </div>
             <div className='grid grid-cols-3'>
                 <div id='col1' className=' m-4 p-2 grid grid-rows-2 justify-center rounded-lg bg-[#0e7f2c]'>
                     <ul>
                         <li className='justify-center flex items-center text-xl'>My Lists</li>
-                        {lists.map((maow, index) => (
+                        {lists.map((list, index) => (
                             <div key={index} className='flex items-center'>
-                                <li className='text-white'>{maow.listName}</li>
+                                <li className='text-white'>{list.listName}</li>
                                 {expandedIndexes.includes(index) ? <IoIosArrowDropleftCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/> 
                                 : <IoIosArrowDroprightCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/>}
                             </div>
                         ))}
                     </ul>
                 </div>
-                {/*Object.values(lists).map((hero, index) =>{
-                    <div id='col2' className={expandedIndexes.includes(index) ? 'm-4 p-2 grid grid-rows-2 justify-center col-span-2 rounded-lg bg-[#0e7f2c]' : 'translate-x-[100%]'}>
-                        <ul className='relative'>
-                        
-                        </ul>
-                </div>
-                })*/}
             </div>
         </div>
     );
