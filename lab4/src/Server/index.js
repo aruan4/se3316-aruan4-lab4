@@ -163,9 +163,18 @@ router.get('/search', async (req, res) => {
         powersSnapshot.forEach((doc) => {
             const matchingHero = data.find(item => item.name === doc.data().hero_names);
             if (matchingHero) {
-                const powers = Object.keys(doc.data()).filter(key => (key !== 'hero_names' && doc.data()[key] === "True"))
-                .filter(key => regexPower.test(key));;
-                matchingHero.Powers = powers;
+                const powers = Object.keys(doc.data()).filter(key => (key !== 'hero_names' && doc.data()[key] === "True"));
+                let matched = false;
+                for(let i in powers){
+                    if(regexPower.test(powers[i])){
+                        matched = true;
+                        break;
+                    }
+                }
+                if(matched)
+                    matchingHero.Powers = powers;
+                else
+                    matchingHero.Powers = [];
             }
         });
         for(let i in data){
