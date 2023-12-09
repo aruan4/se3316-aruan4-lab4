@@ -12,7 +12,7 @@ let PopularLists = () => {
             <h1 className='flex justify-center text-[#12a93b] font-techFont text-2xl pb-6'>Popular lists</h1>
             <div className='grid grid-cols-3'>
                 <div id='col1' className=' m-4 p-2 grid grid-rows-2 justify-center rounded-lg bg-[#0e7f2c]'>
-                    <p>Top 10 lists</p>
+                    <p>Public Lists</p>
                     <ul>
                         <li className='text-white hover:bg-[#3ab85c]' onClick={handleInfo}>temp</li>
                     </ul>

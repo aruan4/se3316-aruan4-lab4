@@ -28,6 +28,11 @@ const Login = function(){
 
     //Login
     const login = async () => {
+        //Input validation
+        if(email === '' || password === ''){
+            alert('Fill in all fields');
+            return;
+        }
         try {
             const credentials = {
                 email: email,
@@ -44,7 +49,19 @@ const Login = function(){
                 alert(response.statusText);
         } catch (error){
             alert('Incorrect credentials');
-            console.error('Error logging in user:');
+        }
+    }
+
+    //Password reset
+    const reset = async () => {
+        try {
+            let response = await fetch(`/api/users/reset?email=${email}`, {
+                method: 'POST'
+            });
+            if(response.ok)
+                alert('Email has been sent!');
+        } catch (error) {
+            alert('Myeh');
         }
     }
 
@@ -59,8 +76,9 @@ const Login = function(){
                 <input type='password' value={password} onChange={handlePassword} className='bg-[#1a1919] w-full rounded-md placeholder-white text-white' placeholder='password'></input>
                 <hr className='bg-white border-1 border-white'></hr>
             </div>
-            <button onClick={login} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Login</button>
-            {!isRegistrationOpen ? <button onClick={openReg} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Register</button> : null}
+            <button onClick={login} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[100px] w-[75px] flex justify-center rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Login</button>
+            <button onClick={reset} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[100px] w-[75px] flex justify-center rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Reset Password</button>
+            {!isRegistrationOpen ? <button onClick={openReg} className='bg-[#095a1f] hover:bg-[#107b2d] sm:w-[100px] w-[75px] flex justify-center rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Register</button> : null}
             <div>
                 {isRegistrationOpen && (<RegistrationPopup onClose={closeReg} />)}
             </div>

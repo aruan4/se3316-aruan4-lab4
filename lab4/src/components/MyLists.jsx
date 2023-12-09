@@ -1,5 +1,5 @@
 import {React, useState} from 'react';
-import {IoIosArrowDropleftCircle, IoIosArrowDroprightCircle} from "react-icons/io";
+import {IoIosArrowDropleftCircle, IoIosArrowDroprightCircle, IoIosEye, IoIosEyeOff, IoMdRefresh} from "react-icons/io";
 import '../index.css';
 
 let MyLists = () => {
@@ -14,6 +14,18 @@ let MyLists = () => {
     updateExpandedIndexes(isExpanded ? expandedIndexes.filter((i) => i !== index) : [...expandedIndexes, index]);
     };
 
+    //Create list popup
+    const [clist, setCList] = useState(false);
+    const handleCList = () => {
+        setCList(!clist);
+    }
+    //Handling public/private
+    const [visibility, setVisibility] = useState(false);
+    const handleVisibility = () => {
+        setVisibility(!visibility);
+    }
+
+    //Input tracking
     const [listName, setListName] = useState('');
     const handleListName = (event) => {
         setListName(event.target.value);
@@ -28,49 +40,71 @@ let MyLists = () => {
     }
     //Create list method
     const create = async () => {
-        let cleaned_heroes = heroes.split(",");
-        let temp = [];
-        for(let i in cleaned_heroes){
-            temp.push(await fetch(`/api/superhero_info/searchid?id=${cleaned_heroes[i]}`));
-        }
-
-        const listDetails = {
-            listName: listName,
-            heroes: temp,
-            description: description
-        }
-        try {
-            const response = await fetch('/api/users/register', {
-                method: 'POST',
-                headers: {"Content-Type": 'application/json'},
-                body: JSON.stringify(listDetails),
-            });
-            let data = response.json();
-            updateLists([...lists, data]);
-        } catch (error) {
-            
+        if(lists.length < 20){
+            //Input validation
+            const noWhitespaceRegex = RegExp(/^\S*$/);
+            if(!noWhitespaceRegex.test(heroes)){
+                alert('Please only use numbers and commas');
+                return;
+            }
+            let vis = '';
+            if(visibility)
+                vis = 'Private';
+            else
+                vis = 'Public';
+            //Split so we can get all hero ids
+            let cleaned_heroes = heroes.split(",");
+            let temp = [];
+            //Create a list of heroes
+            for(let i in cleaned_heroes){
+                const response = await fetch(`/api/superhero_info/searchid?id=${cleaned_heroes[i]}`);
+                const data = await response.json()
+                temp.push(data);
+            }
+            //List details
+            const listDetails = {
+                listName: listName,
+                heroes: temp,
+                description: description,
+                visibility: vis
+            }
+            //Create the list
+            try {
+                const response = await fetch('/api/users/lists/create', {
+                    method: 'POST',
+                    headers: {"Content-Type": 'application/json'},
+                    body: JSON.stringify(listDetails),
+                });
+                let data = response.json();
+                updateLists([...lists, data]);
+                handleCList();
+            } catch (error) {
+                console.log('Error creating list');
+            }
+        } else {
+            alert('Max number of lists reached')
         }
     }
 
-    //Getting user's lists
-    const getList = async () => {
-        try {
-            //Clear previous results
-            updateLists([]);
-            //Fetch call
-            const response = await fetch(`/api/users/lists/view`,{
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+        //Getting user's lists
+        const getList = async () => {
+            try {
+                //Clear previous results
+                updateLists([]);
+                //Fetch call
+                const response = await fetch(`/api/users/lists/view`,{
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                //Organize the data into a json object
+                const data = await response.json();
+                //Add to lists and add names to names list
+                updateLists(data);
+                displayList();
+            } catch (error) {
+                console.error('Error fetching data:', error);
             }
-            //Organize the data into a json object
-            const data = await response.json();
-            //Add to lists and add names to names list
-            updateLists(data);
-            displayList();
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
     }
 
     //Display user's lists and contents
@@ -89,10 +123,11 @@ let MyLists = () => {
             <div className='flex items-center justify-center'>
                 <h1 className='flex justify-center items-center text-[#12a93b] text-2xl drop-shadow-lg p-6'>My Lists</h1>
                 <button onClick={getList} className='flex items-center justify-center bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Get my lists</button>
+                <button onClick={handleCList} className='flex items-center justify-center bg-[#095a1f] hover:bg-[#107b2d] sm:w-[150px] w-[100px] rounded-md font-small font-techFont my-6 mx-2 py-3 px-6 text-white'>Create list</button>
             </div>
             <div>
             <div className='m-4 p-4 bg-[#242323] font-techFont grid items-center justify-center'>
-            <div className="popup-content">
+            {clist ? <div>
                 <h2 className='text-white'>Create a list</h2>
                 <div>
                     <input onChange={handleListName} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='list name'></input>
@@ -106,9 +141,14 @@ let MyLists = () => {
                     <textarea onChange={handleDescription} className='m-2 bg-[#242323] w-full rounded-md placeholder-white text-white' placeholder='description'></textarea>
                     <hr className='bg-white border-1 border-white'></hr>
                 </div>
+                <div className='flex items-center justify-evenly p-4'>
+                    <IoIosEye size={30} color={visibility ? 'white':''}/>
+                    <IoIosEyeOff size={30} color={visibility ? '':'white'}/>
+                    <IoMdRefresh size={30} className='icons' onClick={handleVisibility}/>
+                </div>
                 <button onClick={create} className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3'>Create</button>
                 <button className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3'>Close</button>
-            </div>
+            </div> :''}
         </div>
             </div>
             <div className='grid grid-cols-3'>

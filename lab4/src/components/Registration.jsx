@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import validator from 'validator';
 
 const RegistrationPopup = ({ onClose }) => {
   // Keep track of email input
@@ -21,6 +22,19 @@ const RegistrationPopup = ({ onClose }) => {
 
   // Register account to database
   const handleRegistration = async () => {
+    //Input validation
+    if(nickname === '' || email === '' || password === ''){
+      alert('Fill out all fields');
+      return;
+    }
+    if(password.length < 6){
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    if (!validator.isEmail(email)) {
+      alert('Email format is invalid')
+      return;
+    }
     try {
       const credentials = {
         nickname: nickname,

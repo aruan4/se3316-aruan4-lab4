@@ -49,7 +49,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig);
 //Auth
-const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } = require('firebase/auth')
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } = require('firebase/auth')
 const auth = getAuth();
 
 //Initialize Firestore
@@ -64,12 +64,21 @@ const listsDb = db.collection('lists');
 //Email validator
 const validator = require('validator');
 
+//Send password reset
+router_users.post('/reset', async (req, res) => {
+    const email = req.query;
+    console.log(email);
+    try {
+        const response = await sendPasswordResetEmail(auth, email);
+        res.send('Password email sent!')
+    } catch (error) {
+        res.status(404).send('Account does not exist for this email');
+    }
+})
+
 //Register user
 router_users.post('/register', async (req, res) => {
     const login = req.body;
-    if (!validator.isEmail(login.email)) {
-        return res.status(400).send('Invalid email format');
-      }
     try {
         //Create user in authentication db
         const userCredential = await createUserWithEmailAndPassword(auth, login.email, login.password);
@@ -122,6 +131,7 @@ router.get('/searchid', async (req, res) => {
                 data = doc.data();
             }
         });
+        console.log(data);
         res.send(data);
     } catch (error) {
         res.send('Error getting data from firestore');
@@ -190,7 +200,7 @@ router.get('/search', async (req, res) => {
 });
 
 //POST a new list of superhero IDs
-router.post('/list/create', async (req, res) => {
+router_users.post('/lists/create', async (req, res) => {
     const listDetails = req.body;
     try {
         //Check who is logged in currently
@@ -204,13 +214,14 @@ router.post('/list/create', async (req, res) => {
         //Get the email of the user so we can match it to a nickname
         const userSnapshot = await usersDb.get();
         userSnapshot.forEach((doc) => {
-            if(doc.data().email = currentUser.email){
+            if(doc.data().email == currentUser.email){
                 listDetails.nickname = doc.data().nickname;
             }
         });
         //Add list to collection
         const docRef = await listsDb.add(listDetails)
         console.log('Document written with ID: ', docRef.id);
+        res.send('List created')
     } catch (error) {
         console.log('Error adding document');
     }
@@ -229,13 +240,14 @@ router_users.get('/lists/view', async (req, res) => {
     const userSnapshot = await usersDb.get();
     let userNickname = undefined;
     userSnapshot.forEach((doc) => {
-        if(doc.data().email = currentUser.email){
+        if(doc.data().email == currentUser.email){
             userNickname = doc.data().nickname;
         }
     })
     try {
         //Search through firestore for a certain list name and corrosponding nickname
         const snapshot  = await listsDb.get();
+        console.log(userNickname); console.log(currentUser.email);
         let data = [];
         snapshot.forEach((doc) => {
             if(doc.data().nickname == userNickname)
