@@ -80,6 +80,13 @@ router_users.post('/reset', async (req, res) => {
 router_users.post('/register', async (req, res) => {
     const login = req.body;
     try {
+        //  //Check for duplicate emails
+        //  const snapshot = await usersDb.get();
+        //  const emailExists = snapshot.docs.some(doc => doc.data().email === login.email);
+ 
+        //  if (emailExists) {
+        //      return res.status(400).send('Email already exists');
+        //  }
         //Create user in authentication db
         const userCredential = await createUserWithEmailAndPassword(auth, login.email, login.password);
 
@@ -89,11 +96,35 @@ router_users.post('/register', async (req, res) => {
             email: login.email,
             nickname: login.nickname,
         });
-        res.send('Verification email sent');
+        res.status(200).send('Verification email sent');
       } catch (error) {
-        res.send('Internal Server Error');
+        res.status(500).send('Internal Server Error');
       }
 });
+
+//Check credentials
+router_users.get('/check', async (req, res) => {
+    try {
+        const credentials = req.body;
+        //Check who is logged in currently
+        const currentUser = auth.currentUser;
+        if(currentUser) {
+            console.log("User is logged in:", currentUser.uid);
+        } else {
+            console.log("No user is currently logged in.");
+            res.send('Not logged in');
+        }
+        //Get the email of the user so we can match it to a nickname
+        const userSnapshot = await usersDb.get();
+        userSnapshot.forEach((doc) => {
+            if(doc.data().type == 'aadmin' && doc.data().email == credentials.email){
+                res.status(200).send('Admin login');
+            }
+        });
+    } catch (error) {
+        res.status(400).send('Not admin')
+    }
+})
 
 //Login User
 router_users.post('/login', async (req, res) => {
@@ -112,8 +143,8 @@ router_users.post('/login', async (req, res) => {
 //Logout User
 router_users.post('/logout', async (req, res) => {
     try {
-        await signOut();
-        console.log('Signed out!');
+        await signOut(auth);
+        res.status(200).send('Signed out!');
     } catch (error) {
         console.log('Error logging out:', error.message);
     }
@@ -262,6 +293,23 @@ router_users.get('/lists/view', async (req, res) => {
         let data = [];
         snapshot.forEach((doc) => {
             if(doc.data().nickname == userNickname)
+                data.push(doc.data());
+        });
+        res.send(data);
+    } catch (error) {
+        console.log('Error getting Firestore data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+//Get all public existing lists
+router_users.get('/lists/viewall', async (req, res) => {
+    try {
+        //Search through firestore for a certain list name and corrosponding nickname
+        const snapshot  = await listsDb.get();
+        let data = [];
+        snapshot.forEach((doc) => {
+            if(data.length < 10 && doc.data().visibility == 'Public')
                 data.push(doc.data());
         });
         res.send(data);

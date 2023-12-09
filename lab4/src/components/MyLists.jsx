@@ -88,25 +88,25 @@ let MyLists = () => {
         }
     }
 
-        //Getting user's lists
-        const getList = async () => {
-            try {
-                //Clear previous results
-                updateLists([]);
-                //Fetch call
-                const response = await fetch(`/api/users/lists/view`,{
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                //Organize the data into a json object
-                const data = await response.json();
-                //Add to lists and add names to names list
-                updateLists(data);
-                displayList();
-            } catch (error) {
-                console.error('Error fetching data:', error);
+    //Getting user's lists
+    const getList = async () => {
+        try {
+            //Clear previous results
+            updateLists([]);
+            //Fetch call
+            const response = await fetch(`/api/users/lists/view`,{
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            //Organize the data into a json object
+            const data = await response.json();
+            //Add to lists and add names to names list
+            updateLists(data);
+            displayList();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
     }
 
     //Display user's lists and contents

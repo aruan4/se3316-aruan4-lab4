@@ -43,8 +43,18 @@ const Login = function(){
                 headers: {"Content-Type": 'application/json'},
                 body: JSON.stringify(credentials),
             });
-            if(response.ok)
-                naviagte('/user');
+            if(response.ok){
+                const response2 = await fetch(`/api/users/check`, {
+                    method: 'POST',
+                    headers: {"Content-Type": 'application/json'},
+                    body: JSON.stringify(credentials),
+                })
+                if(response2.ok){
+                    naviagte('/admin');
+                } else{
+                    naviagte('/user');
+                }
+            }
             else
                 alert(response.statusText);
         } catch (error){
