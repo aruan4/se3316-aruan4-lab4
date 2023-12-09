@@ -15,8 +15,8 @@ app.use('/api/superhero_info', router);
 app.use('/api/superhero_powers', router_powers);
 app.use('/api/users', router_users)
 
-// const cors = require('cors');
-// app.use(cors());
+const cors = require('cors');
+app.use(cors());
 
 //Setup middleware to do logging
 app.use((req, res, next) => {
