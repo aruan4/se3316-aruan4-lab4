@@ -122,7 +122,6 @@ router_users.post('/logout', async (req, res) => {
 //Get heroes based on ID
 router.get('/searchid', async (req, res) => {
     const id = req.query;
-    console.log(id);
     try {
         const snapshot  = await supInfo.get();
         let data = null;  
@@ -131,7 +130,6 @@ router.get('/searchid', async (req, res) => {
                 data = doc.data();
             }
         });
-        console.log(data);
         res.send(data);
     } catch (error) {
         res.send('Error getting data from firestore');
@@ -218,6 +216,15 @@ router_users.post('/lists/create', async (req, res) => {
                 listDetails.nickname = doc.data().nickname;
             }
         });
+        //Check for existing listName
+        const existingList = await listsDb
+            .where('listName', '==', listDetails.listName)
+            .get();
+
+        if (!existingList.empty) {
+            console.log('List name already exists.');
+            return res.status(400).send('List name already exists for the user.');
+        }
         //Add list to collection
         const docRef = await listsDb.add(listDetails)
         console.log('Document written with ID: ', docRef.id);

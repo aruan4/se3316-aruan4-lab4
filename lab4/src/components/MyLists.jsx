@@ -20,7 +20,7 @@ let MyLists = () => {
         setCList(!clist);
     }
     //Handling public/private
-    const [visibility, setVisibility] = useState(false);
+    const [visibility, setVisibility] = useState(true);
     const handleVisibility = () => {
         setVisibility(!visibility);
     }
@@ -75,9 +75,11 @@ let MyLists = () => {
                     headers: {"Content-Type": 'application/json'},
                     body: JSON.stringify(listDetails),
                 });
-                let data = response.json();
-                updateLists([...lists, data]);
-                handleCList();
+                if(response.ok){
+                    let data = response.json();
+                    updateLists([...lists, data]);
+                    handleCList();
+                }
             } catch (error) {
                 console.log('Error creating list');
             }
@@ -142,8 +144,8 @@ let MyLists = () => {
                     <hr className='bg-white border-1 border-white'></hr>
                 </div>
                 <div className='flex items-center justify-evenly p-4'>
-                    <IoIosEye size={30} color={visibility ? 'white':''}/>
-                    <IoIosEyeOff size={30} color={visibility ? '':'white'}/>
+                    <IoIosEye size={30} color={!visibility ? 'white':''}/>
+                    <IoIosEyeOff size={30} color={visibility ? 'white':''}/>
                     <IoMdRefresh size={30} className='icons' onClick={handleVisibility}/>
                 </div>
                 <button onClick={create} className='bg-[#095a1f] hover:bg-[#107b2d] rounded-lg p-2 mx-1 mt-3'>Create</button>
@@ -151,20 +153,25 @@ let MyLists = () => {
             </div> :''}
         </div>
             </div>
-            <div className='grid grid-cols-3'>
-                <div id='col1' className=' m-4 p-2 grid grid-rows-2 justify-center rounded-lg bg-[#0e7f2c]'>
+                <div id='col1' className=' m-4 p-2 gridjustify-center rounded-lg bg-[#0e7f2c]'>
                     <ul>
                         <li className='justify-center flex items-center text-xl'>My Lists</li>
-                        {lists.map((list, index) => (
-                            <div key={index} className='flex items-center'>
-                                <li className='text-white'>{list.listName}</li>
-                                {expandedIndexes.includes(index) ? <IoIosArrowDropleftCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/> 
-                                : <IoIosArrowDroprightCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/>}
+                        {Object.values(lists).map((list, index) => (
+                            <div id='innerCol1' className='flex items-center justify-center bg-[#0e7f2c] rounded-lg p-2 m-4' key={index}>
+                                <SiDuckduckgo size={30} className='icons' onClick={() => Duckduckgo(list.listName)}/>
+                                <li className='p-2'>{expandedIndexes.includes(index) ? (
+                                    <ul>
+                                    {Object.entries(list.heroes).map(([key, value]) => (
+                                        <li key={key}>{`${key}: ${value}`}</li>
+                                    ))}
+                                    </ul>
+                                ) : `${hero.name} --- ${hero.Publisher}`}</li>
+                                {expandedIndexes.includes(index) ? <IoIosArrowDropupCircle size={30} className='icons' onClick={() => handleExpand(index)}/> 
+                                : <IoIosArrowDropdownCircle size={30} className='icons' onClick={() => handleExpand(index)}/>}
                             </div>
                         ))}
                     </ul>
                 </div>
-            </div>
         </div>
     );
 }
