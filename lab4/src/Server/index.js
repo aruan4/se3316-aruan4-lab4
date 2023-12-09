@@ -163,16 +163,20 @@ router.get('/search', async (req, res) => {
     try {
         const snapshot  = await supInfo.get();  
         const data = [];
+        //Getting all heroes matching the above regexes
         snapshot.forEach((doc) => {
             if(regexName.test(doc.data().name) && regexRace.test(doc.data().Race) && regexPb.test(doc.data().Publisher))
                 data.push(doc.data());
         });
+        //Getting all powers matching power regex using the list from the above sanpshot
         const powersSnapshot = await supPowers.where('hero_names', 'in', data.map(item => item.name)).get();
         powersSnapshot.forEach((doc) => {
             const matchingHero = data.find(item => item.name === doc.data().hero_names);
             if (matchingHero) {
+                //Only get true powers
                 const powers = Object.keys(doc.data()).filter(key => (key !== 'hero_names' && doc.data()[key] === "True"));
                 let matched = false;
+                //If the powers has at least 1 matched power, add it to the hero object
                 for(let i in powers){
                     if(regexPower.test(powers[i])){
                         matched = true;
@@ -181,6 +185,7 @@ router.get('/search', async (req, res) => {
                 }
                 if(matched)
                     matchingHero.Powers = powers;
+                //Otherwise make it have no powers
                 else
                     matchingHero.Powers = [];
             }
@@ -254,7 +259,6 @@ router_users.get('/lists/view', async (req, res) => {
     try {
         //Search through firestore for a certain list name and corrosponding nickname
         const snapshot  = await listsDb.get();
-        console.log(userNickname); console.log(currentUser.email);
         let data = [];
         snapshot.forEach((doc) => {
             if(doc.data().nickname == userNickname)
@@ -268,15 +272,42 @@ router_users.get('/lists/view', async (req, res) => {
 });
 
 //Delete an existing list
-router.delete('/list/delete', (req, res) => {
-    //Search through storage for a certain list name
-    let list = req.body;
-    if(storage.get(list.name)){
-        storage.remove(list.name);
-        res.send(`${list.name} has been deleted`);
-    }
-    else{
-        res.status(400).send('Missing name');
+router_users.delete('/lists/delete', async (req, res) => {
+    const listName = req.query;
+    try {
+        //Check who is logged in currently
+        const currentUser = auth.currentUser;
+        if(currentUser) {
+            console.log("User is logged in:", currentUser.uid);
+        } else {
+            console.log("No user is currently logged in.");
+            res.send('Not logged in');
+        }
+        //Get the email of the user so we can match it to a nickname
+        const userSnapshot = await usersDb.get();
+        let nickname = '';
+        userSnapshot.forEach((doc) => {
+            if(doc.data().email == currentUser.email){
+                nickname = doc.data().nickname;
+            }
+        });
+        let listFound = false;
+        const snapshot  = await listsDb.get();
+        for (const doc of snapshot.docs) {
+            if (doc.data().listName == listName.listName) {
+                await doc.ref.delete();
+                console.log('deleted');
+                listFound = true;
+                break;
+            }
+        }
+        if (listFound) {
+            res.status(200).send('List deleted successfully');
+        } else {
+            res.status(404).send('List not found');
+        }
+    } catch(error){
+        res.status(500).send('Error');
     }
 });
 

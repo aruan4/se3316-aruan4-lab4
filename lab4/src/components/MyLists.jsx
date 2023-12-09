@@ -119,6 +119,18 @@ let MyLists = () => {
         }
         return listNames;
     }
+    
+    //Delete a list
+    const deleteList = async (listName) => {
+        const response = await fetch(`/api/users/lists/delete?listName=${listName}`,{
+            method: 'DELETE'
+        });
+        if(response.ok){
+            alert(`${listName} has been deleted`);
+        } else {
+            alert("Couldn't find the list");
+        }
+    }
 
     return(
         <div className='px-16 py-8 m-8 bg-[#242323]'>
@@ -153,25 +165,24 @@ let MyLists = () => {
             </div> :''}
         </div>
             </div>
-                <div id='col1' className=' m-4 p-2 gridjustify-center rounded-lg bg-[#0e7f2c]'>
+            <div className='grid grid-cols-3'>
+                <div id='col1' className=' m-4 p-2 grid justify-center rounded-lg bg-[#0e7f2c]'>
                     <ul>
                         <li className='justify-center flex items-center text-xl'>My Lists</li>
-                        {Object.values(lists).map((list, index) => (
-                            <div id='innerCol1' className='flex items-center justify-center bg-[#0e7f2c] rounded-lg p-2 m-4' key={index}>
-                                <SiDuckduckgo size={30} className='icons' onClick={() => Duckduckgo(list.listName)}/>
-                                <li className='p-2'>{expandedIndexes.includes(index) ? (
-                                    <ul>
-                                    {Object.entries(list.heroes).map(([key, value]) => (
-                                        <li key={key}>{`${key}: ${value}`}</li>
-                                    ))}
-                                    </ul>
-                                ) : `${hero.name} --- ${hero.Publisher}`}</li>
-                                {expandedIndexes.includes(index) ? <IoIosArrowDropupCircle size={30} className='icons' onClick={() => handleExpand(index)}/> 
-                                : <IoIosArrowDropdownCircle size={30} className='icons' onClick={() => handleExpand(index)}/>}
+                        {lists.map((list, index) => (
+                            <div key={index} className='flex items-center'>
+                                <button className='bg-[#ffffff] hover:bg-[#c5c5c5] rounded-lg p-2 mx-1 mt-3' onClick={() => deleteList(list.listName)}>Delete</button>
+                                <li className='text-white'>{list.listName}</li>
+                                {expandedIndexes.includes(index) ? <IoIosArrowDropleftCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/> 
+                                : <IoIosArrowDroprightCircle className='icons' color='white' size={30} onClick={() => handleExpand(index)}/>}
                             </div>
                         ))}
                     </ul>
                 </div>
+                <div className='grid col-span-2 items-center justify-center bg-[#0e7f2c] rounded-lg p-2 m-4'>
+
+                </div>
+            </div>
         </div>
     );
 }
